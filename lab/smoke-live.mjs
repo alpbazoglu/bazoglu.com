@@ -1,0 +1,16 @@
+import { chromium } from "../../bazoglu-site/node_modules/playwright-core/index.mjs";
+const b = await chromium.launch({ channel: "chrome", args: ["--host-resolver-rules=MAP bazoglu.com 104.21.94.126, MAP www.bazoglu.com 104.21.94.126"] });
+const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+const errs = []; p.on("pageerror", e => errs.push(String(e))); p.on("console", m => { if (m.type() === "error") errs.push(m.text()); }); p.on("requestfailed", r => errs.push("REQ " + r.url()));
+const resp = await p.goto("https://bazoglu.com/", { waitUntil: "networkidle" });
+const sec = await resp.securityDetails();
+console.log("status", resp.status(), "url", p.url(), "issuer", sec && sec.issuer, "cn", sec && sec.subjectName);
+await p.waitForTimeout(800);
+console.log("title", await p.title());
+console.log("cells", await p.locator("#resultsGrid .cell").count(), "price", await p.$eval("#resultsGrid .cell .price b", b => b.textContent));
+await p.click("#modeVehicle"); await p.waitForFunction(() => document.querySelectorAll("#vMake option").length > 5, null, { timeout: 15000 });
+console.log("vehicle makes loaded");
+const r2 = await p.goto("https://www.bazoglu.com/", { waitUntil: "networkidle" }); console.log("www final", p.url(), r2.status());
+const r3 = await p.goto("http://bazoglu.com/", { waitUntil: "networkidle" }); console.log("http final", p.url(), r3.status());
+console.log(errs.length ? "ERRORS " + errs.join(" | ") : "no console errors");
+await b.close();

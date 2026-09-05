@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23FCE300%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-family=%27Arial Narrow,Arial%27 font-weight=%27700%27 font-size=%2720%27 text-anchor=%27middle%27 fill=%27%23121212%27%3EB%3C/text%3E%3C/svg%3E">
-<link rel="preload" as="image" href="assets/pilot-sport-5-2000.webp">
+<link rel="preload" as="image" href="assets/pilot-sport-5-front-2000.webp">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -394,17 +394,184 @@ p{margin:0}
   .ticker-track{animation:none !important}
 }
 </style>
+<style>
+/* ===================== V6: scroll-driven layer ===================== */
+/* Media base */
+.bgvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.bgposter{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.scrim{position:absolute;inset:0;pointer-events:none}
+
+/* ---------- Act 1: the wheel ---------- */
+.hero{min-height:0;overflow:visible;background:var(--black)}
+.hero-stage{position:relative;height:100svh;min-height:640px;background:var(--black);overflow:hidden}
+.hero-stage .floor{top:50%}
+.hero-stage .wrap{position:relative;height:100%;min-height:0;display:grid;grid-template-columns:repeat(12,1fr);gap:24px;align-items:center;padding-top:72px;padding-bottom:0}
+.hero-text{grid-column:1/7;grid-row:1;position:relative;z-index:2}
+.hero-tire{grid-column:7/13;grid-row:1;position:relative;z-index:1;justify-self:center;width:min(42vw,72vh);max-width:100%;aspect-ratio:1/1;margin:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.92);transition:opacity 1.1s var(--ease),transform 1.1s var(--ease)}
+.hero-tire.is-in{opacity:1;transform:none}
+.tire-move{width:100%;height:100%;display:flex;align-items:center;justify-content:center;will-change:transform}
+.hero-tire img{width:100%;height:auto;opacity:1;transform:none;transition:none;transform-origin:50% 50%;will-change:transform}
+.hero-tire img.is-in{opacity:1;transform:none;transition:none}
+.hero-finder{position:relative;z-index:3;margin:32px var(--pad) 0;max-width:640px}
+.hero-finder .finder-card{background:var(--card);color:var(--ink)}
+.hero-finder :focus-visible{outline-color:var(--ink)}
+.hero-finder .finder-card .btn{margin-top:20px}
+html.gsap-hero .hero-finder{position:absolute;left:var(--pad);top:50%;margin:0;width:min(600px,46vw);transform:translateY(-50%);max-height:calc(100svh - 120px);overflow:auto;will-change:transform}
+html.gsap-hero .hero-finder .finder-card{padding:28px}
+
+/* ---------- Act 2: results next to the diagram ---------- */
+.olcu-copy{grid-column:1/5}
+.olcu .results{grid-column:5/13;margin-top:0}
+@media (min-width:1024px){.olcu .grid{grid-template-columns:repeat(2,1fr)}}
+.cell img{will-change:transform}
+
+/* ---------- Act 3: montaj (peak) ---------- */
+.montaj{position:relative;background:var(--black);color:var(--white)}
+.montaj-stage{position:relative;height:100svh;min-height:600px;overflow:hidden;background:var(--black)}
+.montaj-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.montaj-stage .fallback[hidden]{display:none}
+.montaj-stage .fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%;will-change:transform}
+.montaj-stage .scrim{background:linear-gradient(90deg,rgba(14,14,14,.72),rgba(14,14,14,.15) 55%,transparent)}
+.capbox{position:absolute;left:var(--pad);right:var(--pad);top:50%;transform:translateY(-50%);z-index:2;display:grid;grid-template-columns:minmax(0,14ch);grid-template-rows:auto auto;row-gap:32px}
+.cap{grid-area:1/1;margin:0;font:700 clamp(40px,5vw,76px)/.96 var(--fd);color:var(--white);opacity:0;will-change:transform,opacity}
+.cap .y{color:var(--yellow)}
+.cap-btn{grid-area:2/1;justify-self:start;opacity:0;pointer-events:none}
+.cap-btn.is-on{pointer-events:auto}
+.montaj-mobile{display:none}
+
+/* ---------- Act 4: rail ---------- */
+.lastikler{position:relative}
+.lastikler .bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.lastikler .bg video{opacity:.10}
+.lastikler .inner{position:relative;z-index:1}
+.rail{will-change:transform}
+html.gsap-rail .lastikler{height:100svh;min-height:680px;padding:0;display:flex;align-items:center}
+html.gsap-rail .lastikler .inner{width:100%}
+html.gsap-rail .rail{overflow:visible;scroll-snap-type:none;cursor:default}
+html.gsap-rail .rail-controls{display:none}
+html.gsap-rail .rail-item{width:360px}
+
+/* ---------- Strips (background loops with one sentence) ---------- */
+.strip{position:relative;height:40vh;min-height:280px;overflow:hidden;background:var(--black);color:var(--white);display:flex;align-items:center}
+.strip .scrim{background:rgba(14,14,14,.55)}
+.strip .wrap{position:relative;z-index:1;width:100%}
+.strip h2{color:var(--white);max-width:14ch}
+.strip.light-strip{border-top:1px solid var(--line)}
+
+/* ---------- Act 6: şubeler ---------- */
+.subeler{position:relative;overflow:hidden}
+.subeler .bg{position:absolute;inset:0;pointer-events:none}
+.subeler .bg video{opacity:.25}
+.subeler .bg .scrim{background:linear-gradient(180deg,rgba(14,14,14,.6),rgba(14,14,14,.35))}
+.subeler .wrap{position:relative;z-index:1}
+.branch .frame{display:block;border:1px solid var(--line-dark);overflow:hidden;aspect-ratio:100/115;background:var(--graphite)}
+.branch .frame img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;will-change:transform}
+.branch.kusget .frame{max-width:480px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1023px){
+  .hero-stage{height:auto;min-height:0;padding:96px 0 40px}
+  .hero-stage .floor{display:none}
+  .hero-stage .wrap{grid-template-columns:1fr;height:auto;padding-top:0;align-items:start}
+  .hero-tire{grid-column:1;grid-row:1;width:92vw;max-width:520px;justify-self:center;margin:0 auto 8px}
+  .hero-text{grid-column:1;grid-row:2}
+  .hero h1{max-width:none}
+  .hero-finder{margin:32px 0 0;max-width:none}
+  .olcu .wrap{grid-template-columns:1fr}
+  .olcu-copy,.olcu .results{grid-column:auto}
+  .olcu .results{margin-top:40px}
+  .montaj-stage{height:auto;min-height:0;display:block;background:var(--black)}
+  .montaj-stage video,.montaj-stage .fallback,.montaj-stage .scrim,.capbox{display:none}
+  .montaj-mobile{display:block}
+  .montaj-mobile img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+  .montaj-mobile .caps{padding:40px var(--pad) 48px;display:flex;flex-direction:column;gap:20px}
+  .montaj-mobile .cap{opacity:1;font-size:clamp(36px,8vw,56px)}
+  .montaj-mobile .btn{align-self:flex-start;margin-top:8px}
+  .strip{height:auto;min-height:0;padding:56px 0}
+}
+@media (max-width:820px){
+  .hero-tire{transform:none}
+  .hero .floor{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-tire{opacity:1;transform:none}
+  .cap{opacity:1}
+  .capbox{position:static;transform:none;display:flex;flex-direction:column;gap:20px;padding:40px var(--pad)}
+  .cap-btn{opacity:1;pointer-events:auto}
+  .montaj-stage{height:auto;min-height:0}
+  .montaj-stage video{display:none}
+  .montaj-stage .fallback{position:relative;height:auto;aspect-ratio:16/9;display:block}
+  .montaj-stage .scrim{display:none}
+  .bgvid{display:none}
+}
+.branch .frame picture{display:block;border:0;overflow:visible}
+
+/* ===================== V6.1: polish after review ===================== */
+h1,h2{text-wrap:balance}
+.hero h1{letter-spacing:-.02em}
+.hero .lead,.hero-facts{font-weight:500}
+.hero .lead{line-height:1.6}
+.scrollbar{display:none}
+.navwheel{display:inline-flex;width:28px;height:28px;margin-left:4px;color:var(--yellow);will-change:transform}
+.navwheel svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+html.gsap-hero .hero-tire{opacity:1;transform:none;transition:none;will-change:transform}
+html.gsap-hero .hero-stage .floor{transform-origin:0 50%}
+.strip{height:34vh;min-height:260px}
+.strip .scrim{background:linear-gradient(90deg,rgba(14,14,14,.8) 0,rgba(14,14,14,.5) 42%,rgba(14,14,14,.12) 72%,transparent)}
+.section{padding:96px 0}
+.neden{padding:80px 0}
+.hizmetler{padding-bottom:88px}
+.hizmetler h2{padding-top:80px}
+.row{padding:22px 0}
+.sss{padding-bottom:88px}
+.sss h2{padding-top:80px}
+.faq summary{padding:18px 0;font-size:22px}
+.subeler{padding:96px 0}
+.randevu{padding:96px 0}
+.footer{padding:40px 0 28px}
+.footer .bottom{margin-top:32px}
+@media (max-width:1023px){
+  .hero-text{grid-row:1}
+  .hero-tire{grid-row:2;width:72vw;max-width:440px;margin:24px auto 0}
+  .strip{padding:48px 0}
+}
+@media (max-width:820px){
+  .section{padding:72px 0}
+  .neden,.subeler,.randevu{padding:72px 0}
+  .hizmetler h2,.sss h2{padding-top:64px}
+  .navwheel{display:none}
+}
+
+/* V6.1b: shorter page. Results full width in 3-4 columns, copy as a compact header row. */
+@media (min-width:1024px){
+  .olcu-copy{grid-column:1/13;display:grid;grid-template-columns:7fr 5fr;gap:32px;align-items:start;padding-bottom:40px;border-bottom:1px solid var(--line)}
+  .olcu-copy h2{grid-column:1}
+  .olcu-copy p{grid-column:1}
+  .olcu-copy svg{grid-column:2;grid-row:1/3;margin-top:0;max-width:300px;justify-self:end}
+  .olcu .results{grid-column:1/13;margin-top:40px}
+  .olcu .grid{grid-template-columns:repeat(3,1fr)}
+  .cell img{height:140px}
+  .cell{min-height:0;padding:20px}
+  .branches{align-items:start}
+  .branch .frame{max-width:440px}
+  .branch.inonu .frame{max-width:440px}
+}
+@media (min-width:1440px){
+  .olcu .grid{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
 </head>
 <body>
-
 <div class="scrollbar" id="scrollbar" aria-hidden="true"></div>
 <header class="nav" id="top">
   <div class="wrap">
     <a class="brand" href="#top"><b>Bazoğlu Lastik</b><span>Michelin Yetkili Bayii</span></a>
     <nav aria-label="Sayfa">
       <ul class="nav-links">
-        <li><a href="#olcu">Ölçünü bul</a></li>
-        <li><a href="#olcu" data-mode="vehicle">Aracıma göre</a></li>
+        <li><a href="#finder" data-goto-finder>Ölçünü bul</a></li>
+        <li><a href="#finder" data-goto-finder data-mode="vehicle">Aracıma göre</a></li>
         <li><a href="#lastikler">Lastikler</a></li>
         <li><a href="#hizmetler">Hizmetler</a></li>
         <li><a href="#subeler">Şubeler</a></li>
@@ -415,13 +582,14 @@ p{margin:0}
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#121212" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3l-2-1c-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
         <span>WhatsApp</span>
       </a>
+      <span class="navwheel" id="navWheel" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16"/><circle cx="20" cy="20" r="4"/><path d="M20 8v8M31.4 13.4l-6.5 4.7M27.1 31.2l-2.5-7.6M12.9 31.2l2.5-7.6M8.6 13.4l6.5 4.7"/></svg></span>
       <button class="menu-btn" type="button" aria-label="Menü" aria-expanded="false" aria-controls="overlay"><i></i><i></i></button>
     </div>
   </div>
 </header>
 
 <div class="overlay" id="overlay">
-  <a class="big" href="#olcu">Ölçünü bul</a>
+  <a class="big" href="#finder">Ölçünü bul</a>
   <a class="big" href="#lastikler">Lastikler</a>
   <a class="big" href="#hizmetler">Hizmetler</a>
   <a class="big" href="#subeler">Şubeler</a>
@@ -436,69 +604,32 @@ p{margin:0}
 
 <main>
 
-<section class="hero">
-  <div class="floor" aria-hidden="true"></div>
-  <div class="wrap">
-    <div class="hero-text">
-      <p class="eyebrow">Gaziantep, İnönü ve Küsget</p>
-      <h1 class="words">Michelin'in Gaziantep'teki adresi.</h1>
-      <p class="lead">Her seri, her ebat. 4 Michelin alana söküm, takma, balans ve sibop dahil.</p>
-      <div class="hero-cta">
-        <a class="btn btn-yellow" href="#olcu">Ölçünü bul</a>
-        <a class="btn btn-ghost" href="#olcu" data-mode="vehicle">Aracıma göre bul</a>
+<!-- Act 1: the wheel -->
+<section class="hero" id="hero">
+  <div class="hero-stage" id="heroStage">
+    <div class="floor" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="hero-text" id="heroText">
+        <p class="eyebrow">Gaziantep, İnönü ve Küsget</p>
+        <h1 class="words">Michelin'in Gaziantep'teki adresi.</h1>
+        <p class="lead">Her seri, her ebat. 4 Michelin alana söküm, takma, balans ve sibop dahil.</p>
+        <div class="hero-cta">
+          <a class="btn btn-yellow" href="#finder" data-goto-finder>Ölçünü bul</a>
+          <a class="btn btn-ghost" href="#finder" data-goto-finder data-mode="vehicle">Aracıma göre bul</a>
+        </div>
+        <ul class="hero-facts" style="list-style:none;margin-left:0;padding-left:0">
+          <li>Michelin Yetkili Bayii</li>
+          <li>Euromaster Hizmet Noktası</li>
+          <li>08:00-18:00, iki şube</li>
+        </ul>
       </div>
-      <ul class="hero-facts" style="list-style:none;margin-left:0;padding-left:0">
-        <li>Michelin Yetkili Bayii</li>
-        <li>Euromaster Hizmet Noktası</li>
-        <li>08:00-18:00, iki şube</li>
-      </ul>
+      <div class="hero-tire" id="heroTireBox">
+        <div class="tire-move" id="tireMove">
+          <img id="heroTire" src="assets/pilot-sport-5-front-2000.webp" srcset="assets/pilot-sport-5-front-900.webp 900w, assets/pilot-sport-5-front-2000.webp 2000w" sizes="(max-width:1023px) 92vw, 42vw" width="1876" height="1876" alt="Michelin Pilot Sport 5 lastik, önden" fetchpriority="high">
+        </div>
+      </div>
     </div>
-    <div class="hero-tire">
-      <img id="heroTire" src="assets/pilot-sport-5-2000.webp" width="1951" height="1750" alt="Michelin Pilot Sport 5 lastik" fetchpriority="high">
-    </div>
-  </div>
-</section>
-
-<div class="ticker" aria-hidden="true">
-  <div class="ticker-track">
-    <ul>
-      <li>Pilot Sport 5</li><li>Primacy 5</li><li>e.Primacy</li><li>CrossClimate 3</li><li>CrossClimate 3 Sport</li><li>Alpin 7</li><li>Pilot Alpin 5</li><li>Latitude Cross</li><li>Agilis 3</li><li>Agilis CrossClimate</li><li>Pilot Sport EV</li><li>Her ebat stokta veya bir günde</li>
-    </ul>
-    <ul>
-      <li>Pilot Sport 5</li><li>Primacy 5</li><li>e.Primacy</li><li>CrossClimate 3</li><li>CrossClimate 3 Sport</li><li>Alpin 7</li><li>Pilot Alpin 5</li><li>Latitude Cross</li><li>Agilis 3</li><li>Agilis CrossClimate</li><li>Pilot Sport EV</li><li>Her ebat stokta veya bir günde</li>
-    </ul>
-  </div>
-</div>
-
-<section class="light section olcu" id="olcu">
-  <div class="wrap">
-    <div class="olcu-copy">
-      <h2 class="words">Lastiğinin yanında yazıyor.</h2>
-      <p class="rv">Yan yüzdeki üç sayıyı seç: genişlik, kesit, jant. Örnek: 225/45 R18. Hafif ticari araçlarda ebadın sonunda C vardır.</p>
-      <svg class="rv" viewBox="0 0 360 240" role="img" aria-label="Lastik yan yüzünde 225/45 R18 yazısı ve üç sayıyı gösteren çizgiler">
-        <g fill="none" stroke="#121212" stroke-width="1.5">
-          <circle cx="120" cy="120" r="108"/>
-          <circle cx="120" cy="120" r="92"/>
-          <circle cx="120" cy="120" r="48"/>
-          <circle cx="120" cy="120" r="14"/>
-          <path d="M120 72v-8M120 176v8M72 120h-8M168 120h8M86 86l-6-6M154 154l6 6M154 86l6-6M86 154l-6 6"/>
-          <path d="M84 60l6 8M152 60l-6 8M60 84l8 6M60 156l8-6M180 84l-8 6M180 156l-8-6M84 180l6-8M152 180l-6-8"/>
-          <path d="M150 100l58-18M150 128l58-8M150 156l58 2"/>
-        </g>
-        <g font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" fill="#121212">
-          <text x="214" y="86" font-size="30">225</text>
-          <text x="214" y="126" font-size="30">45</text>
-          <text x="214" y="164" font-size="30">R18</text>
-        </g>
-        <g font-family="Barlow, Arial, sans-serif" font-size="13" fill="#5E5C57">
-          <text x="270" y="86">genişlik, mm</text>
-          <text x="270" y="126">kesit, yüzde</text>
-          <text x="270" y="164">jant, inç</text>
-        </g>
-      </svg>
-    </div>
-
-    <div class="finder">
+    <div class="hero-finder" id="heroFinder">
       <form class="finder-card" id="finder" novalidate>
         <div class="modes" role="tablist" aria-label="Arama yolu">
           <span class="ind" aria-hidden="true"></span>
@@ -529,7 +660,48 @@ p{margin:0}
         </div>
       </form>
     </div>
+  </div>
+</section>
 
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <ul>
+      <li>Pilot Sport 5</li><li>Primacy 5</li><li>e.Primacy</li><li>CrossClimate 3</li><li>CrossClimate 3 Sport</li><li>Alpin 7</li><li>Pilot Alpin 5</li><li>Latitude Cross</li><li>Agilis 3</li><li>Agilis CrossClimate</li><li>Pilot Sport EV</li><li>Her ebat stokta veya bir günde</li>
+    </ul>
+    <ul>
+      <li>Pilot Sport 5</li><li>Primacy 5</li><li>e.Primacy</li><li>CrossClimate 3</li><li>CrossClimate 3 Sport</li><li>Alpin 7</li><li>Pilot Alpin 5</li><li>Latitude Cross</li><li>Agilis 3</li><li>Agilis CrossClimate</li><li>Pilot Sport EV</li><li>Her ebat stokta veya bir günde</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Act 2: ölçü and results -->
+<section class="light section olcu" id="olcu">
+  <div class="wrap">
+    <div class="olcu-copy">
+      <h2 class="words">Lastiğinin yanında yazıyor.</h2>
+      <p class="rv">Yan yüzdeki üç sayıyı seç: genişlik, kesit, jant. Örnek: 225/45 R18. Hafif ticari araçlarda ebadın sonunda C vardır.</p>
+      <svg class="rv" viewBox="0 0 360 240" role="img" aria-label="Lastik yan yüzünde 225/45 R18 yazısı ve üç sayıyı gösteren çizgiler">
+        <g fill="none" stroke="#121212" stroke-width="1.5">
+          <circle cx="120" cy="120" r="108"/>
+          <circle cx="120" cy="120" r="92"/>
+          <circle cx="120" cy="120" r="48"/>
+          <circle cx="120" cy="120" r="14"/>
+          <path d="M120 72v-8M120 176v8M72 120h-8M168 120h8M86 86l-6-6M154 154l6 6M154 86l6-6M86 154l-6 6"/>
+          <path d="M84 60l6 8M152 60l-6 8M60 84l8 6M60 156l8-6M180 84l-8 6M180 156l-8-6M84 180l6-8M152 180l-6-8"/>
+          <path d="M150 100l58-18M150 128l58-8M150 156l58 2"/>
+        </g>
+        <g font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" fill="#121212">
+          <text x="214" y="86" font-size="30">225</text>
+          <text x="214" y="126" font-size="30">45</text>
+          <text x="214" y="164" font-size="30">R18</text>
+        </g>
+        <g font-family="Barlow, Arial, sans-serif" font-size="13" fill="#5E5C57">
+          <text x="270" y="86">genişlik, mm</text>
+          <text x="270" y="126">kesit, yüzde</text>
+          <text x="270" y="164">jant, inç</text>
+        </g>
+      </svg>
+    </div>
     <div class="results" id="results" aria-live="polite">
       <h3 id="resultsTitle">225/45 R18 için Michelin serileri</h3>
       <p class="sub" id="resultsSub"></p>
@@ -539,7 +711,34 @@ p{margin:0}
   </div>
 </section>
 
+<!-- Act 3: montaj, the peak -->
+<section class="montaj" id="montaj" aria-label="Montaj">
+  <div class="montaj-stage" id="montajStage">
+    <video id="montajVideo" muted playsinline preload="metadata" poster="assets/clips/pit-poster.jpg" disablepictureinpicture data-src="assets/clips/pit-scrub.mp4" aria-hidden="true"></video>
+    <img class="fallback" id="montajFallback" src="assets/branch-inonu-2000.jpg" width="2000" height="2500" alt="" loading="lazy" hidden>
+    <div class="scrim" aria-hidden="true"></div>
+    <div class="capbox" id="capbox">
+      <p class="cap" data-in="0.10" data-out="0.35">Söküm ve takma <span class="y">dahil</span>.</p>
+      <p class="cap" data-in="0.38" data-out="0.63">Balans ve sibop <span class="y">dahil</span>.</p>
+      <p class="cap" data-in="0.66" data-out="0.92">4 Michelin alana, <span class="y">ayrıca ücret yok</span>.</p>
+      <a class="btn btn-yellow cap-btn" id="capBtn" href="#randevu" tabindex="-1">Randevu al</a>
+    </div>
+    <div class="montaj-mobile">
+      <img src="assets/clips/pit-poster-m.jpg" width="1920" height="1080" alt="Lastik değişimi" loading="lazy">
+      <div class="caps">
+        <p class="cap rv">Söküm ve takma <span class="y">dahil</span>.</p>
+        <p class="cap rv">Balans ve sibop <span class="y">dahil</span>.</p>
+        <p class="cap rv">4 Michelin alana, <span class="y">ayrıca ücret yok</span>.</p>
+        <a class="btn btn-yellow rv" href="#randevu">Randevu al</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Act 4: the rail -->
 <section class="lastikler" id="lastikler">
+  <div class="bg" aria-hidden="true"><video class="bgvid" muted playsinline loop preload="none" poster="assets/clips/jant-corvette-poster.jpg" disablepictureinpicture data-loop data-src="assets/clips/jant-corvette.mp4"></video></div>
+  <div class="inner">
   <div class="section-head">
     <h2 class="words">Her seri. Her ebat.</h2>
     <p class="rv">Binek, SUV, 4x4 ve hafif ticari. Stokta yoksa bir günde.</p>
@@ -588,8 +787,26 @@ p{margin:0}
     <article class="rail-item rv"><img src="assets/agilis-crossclimate-800.webp" width="800" height="718" alt="Michelin Agilis CrossClimate lastik" loading="lazy"><h3>Agilis CrossClimate</h3><p class="meta">4 Mevsim, hafif ticari</p><a class="tlink" href="#olcu" data-family="agilis-crossclimate" data-size="195-70-15C">Ebatları gör</a></article>
     <article class="rail-item rv"><img src="assets/agilis-alpin-800.webp" width="800" height="718" alt="Michelin Agilis Alpin lastik" loading="lazy"><h3>Agilis Alpin</h3><p class="meta">Kış, hafif ticari</p><a class="tlink" href="#olcu" data-family="agilis-alpin" data-size="195-70-15C">Ebatları gör</a></article>
   </div>
+  </div>
 </section>
 
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <ul>
+      <li>195/65 R15</li><li>205/55 R16</li><li>225/45 R17</li><li>225/45 R18</li><li>235/55 R19</li><li>205/65 R16C</li><li>215/65 R16C</li><li>Aradığın ebat burada</li>
+    </ul>
+    <ul>
+      <li>195/65 R15</li><li>205/55 R16</li><li>225/45 R17</li><li>225/45 R18</li><li>235/55 R19</li><li>205/65 R16C</li><li>215/65 R16C</li><li>Aradığın ebat burada</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Act 5: neden -->
+<div class="strip" aria-label="Michelin'in servis standardıyla">
+  <video class="bgvid" muted playsinline loop preload="none" poster="assets/clips/montaj-poster.jpg" disablepictureinpicture data-loop data-src="assets/clips/montaj.mp4" aria-hidden="true"></video>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="wrap"><h2 class="words">Michelin'in servis standardıyla.</h2></div>
+</div>
 <section class="light neden">
   <div class="wrap">
     <div class="cols">
@@ -631,6 +848,40 @@ p{margin:0}
   </div>
 </section>
 
+<!-- Act 6: şubeler -->
+<section class="subeler" id="subeler">
+  <div class="bg" aria-hidden="true"><video class="bgvid" muted playsinline loop preload="none" poster="assets/clips/dukkan-onu-poster.jpg" disablepictureinpicture data-loop data-src="assets/clips/dukkan-onu.mp4"></video><div class="scrim"></div></div>
+  <div class="wrap">
+    <h2 class="words">İnönü ve Küsget.</h2>
+    <div class="branches">
+      <div class="branch inonu">
+        <div class="frame"><picture>
+          <source srcset="assets/branch-inonu-1400.webp" type="image/webp">
+          <img src="assets/branch-inonu-2000.jpg" width="2000" height="2500" alt="Bazoğlu Lastik İnönü şubesi, dükkan önü" loading="lazy">
+        </picture></div>
+        <h3>İnönü Şube</h3>
+        <address>Bahçelievler, İsmet İnönü Cd. Selçuk Apt. Altı No:17/B, 27010 Şahinbey / Gaziantep</address>
+        <div class="links">
+          <a class="tlink" href="https://www.google.com/maps/search/?api=1&query=Bazo%C4%9Flu+Lastik+%C4%B0smet+%C4%B0n%C3%B6n%C3%BC+Caddesi+Bah%C3%A7elievler+%C5%9Eahinbey+Gaziantep" target="_blank" rel="noopener">Yol tarifi</a>
+          <a class="tlink" href="https://wa.me/905331433270" data-wa="Merhaba, İnönü şubesi için yazıyorum. " target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+      <div class="branch kusget">
+        <div class="frame"><picture>
+          <img src="assets/branch-kusget-800.jpg" width="800" height="1000" alt="Bazoğlu Lastik Küsget şubesi" loading="lazy">
+        </picture></div>
+        <h3>Küsget Şube</h3>
+        <address>Sanayi, Anafartalar Cd. Küsget Sanayi Sitesi D:139, 27110 Şehitkamil / Gaziantep</address>
+        <div class="links">
+          <a class="tlink" href="https://www.google.com/maps/search/?api=1&query=Bazo%C4%9Flu+Lastik+K%C3%BCsget+Sanayi+Sitesi+Anafartalar+Caddesi+%C5%9Eehitkamil+Gaziantep" target="_blank" rel="noopener">Yol tarifi</a>
+          <a class="tlink" href="https://wa.me/905331433270" data-wa="Merhaba, Küsget şubesi için yazıyorum. " target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Act 7: randevu, sık sorulanlar -->
 <section class="light sss" id="sss">
   <div class="wrap">
     <h2 class="words">Sık sorulanlar</h2>
@@ -645,7 +896,6 @@ p{margin:0}
     </div>
   </div>
 </section>
-
 <section class="randevu" id="randevu">
   <div class="wrap">
     <div>
@@ -658,37 +908,6 @@ p{margin:0}
       <a class="num" href="tel:+905331433270">0533 143 32 70</a>
       <a class="btn btn-white" href="https://wa.me/905331433270" data-wa="Merhaba, randevu almak istiyorum. Şube: İnönü / Küsget. Araç veya ebat: . Tarih ve saat: " target="_blank" rel="noopener">WhatsApp'tan yaz</a>
       <div class="tels"><span>Telefon</span><a href="tel:+903422313200">0342 231 32 00</a><a href="tel:+903422321019">0342 232 10 19</a></div>
-    </div>
-  </div>
-</section>
-
-<section class="subeler" id="subeler">
-  <div class="wrap">
-    <h2 class="words">İnönü ve Küsget.</h2>
-    <div class="branches">
-      <div class="branch inonu">
-        <picture>
-          <source srcset="assets/branch-inonu-1400.webp" type="image/webp">
-          <img src="assets/branch-inonu-2000.jpg" width="2000" height="2500" alt="Bazoğlu Lastik İnönü şubesi, dükkan önü" loading="lazy">
-        </picture>
-        <h3>İnönü Şube</h3>
-        <address>Bahçelievler, İsmet İnönü Cd. Selçuk Apt. Altı No:17/B, 27010 Şahinbey / Gaziantep</address>
-        <div class="links">
-          <a class="tlink" href="https://www.google.com/maps/search/?api=1&query=Bazo%C4%9Flu+Lastik+%C4%B0smet+%C4%B0n%C3%B6n%C3%BC+Caddesi+Bah%C3%A7elievler+%C5%9Eahinbey+Gaziantep" target="_blank" rel="noopener">Yol tarifi</a>
-          <a class="tlink" href="https://wa.me/905331433270" data-wa="Merhaba, İnönü şubesi için yazıyorum. " target="_blank" rel="noopener">WhatsApp</a>
-        </div>
-      </div>
-      <div class="branch kusget">
-        <picture>
-          <img src="assets/branch-kusget-800.jpg" width="800" height="1000" alt="Bazoğlu Lastik Küsget şubesi" loading="lazy">
-        </picture>
-        <h3>Küsget Şube</h3>
-        <address>Sanayi, Anafartalar Cd. Küsget Sanayi Sitesi D:139, 27110 Şehitkamil / Gaziantep</address>
-        <div class="links">
-          <a class="tlink" href="https://www.google.com/maps/search/?api=1&query=Bazo%C4%9Flu+Lastik+K%C3%BCsget+Sanayi+Sitesi+Anafartalar+Caddesi+%C5%9Eehitkamil+Gaziantep" target="_blank" rel="noopener">Yol tarifi</a>
-          <a class="tlink" href="https://wa.me/905331433270" data-wa="Merhaba, Küsget şubesi için yazıyorum. " target="_blank" rel="noopener">WhatsApp</a>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -718,10 +937,10 @@ p{margin:0}
     </div>
   </div>
 </footer>
-
 <a class="fab" id="fab" href="https://wa.me/905331433270" data-wa="Merhaba, Michelin lastik için bilgi almak istiyorum." target="_blank" rel="noopener" aria-label="WhatsApp'tan yaz">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#121212" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.3 2.4 1 2.9.8 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3l-2-1c-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
 </a>
+
 <script>
 (function(){
   "use strict";
@@ -752,12 +971,15 @@ p{margin:0}
   function applyTire(){
     ticking = false;
     if (reduced) return;
-    tire.style.transform = "rotate(" + (window.scrollY * 0.12).toFixed(2) + "deg)";
+    if (document.documentElement.classList.contains("gsap-hero")) return;
+    tire.style.transform = "rotate(" + (window.scrollY * 0.15).toFixed(2) + "deg)";
   }
   var bar = document.getElementById("scrollbar"), fab = document.getElementById("fab");
   function onScrollExtras(){
     var max = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, window.scrollY / max) : 0).toFixed(4) + ")";
+    var pr = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+    bar.style.transform = "scaleX(" + pr.toFixed(4) + ")";
+    var nw = document.getElementById("navWheel"); if (nw) nw.style.transform = "rotate(" + (pr * 720).toFixed(1) + "deg)";
     fab.classList.toggle("is-on", window.scrollY > window.innerHeight * 0.6);
   }
   onScrollExtras();
@@ -767,14 +989,14 @@ p{margin:0}
   }
   window.addEventListener("scroll", onScroll, { passive: true });
   function tireIn(){
-    tire.classList.add("is-in");
+    document.getElementById("heroTireBox").classList.add("is-in");
     setTimeout(function(){ tire.classList.add("is-scroll"); applyTire(); }, 1150);
   }
   if (tire.complete) requestAnimationFrame(tireIn); else tire.addEventListener("load", tireIn);
 
   /* Ticker duration from content width: 60px/s */
-  var track = document.querySelector(".ticker-track");
-  function tickDur(){ var w = track.scrollWidth / 2; track.style.setProperty("--tick-dur", (w / 60).toFixed(1) + "s"); }
+  var tracks = document.querySelectorAll(".ticker-track");
+  function tickDur(){ tracks.forEach(function(track){ var w = track.scrollWidth / 2; track.style.setProperty("--tick-dur", (w / 60).toFixed(1) + "s"); }); }
   tickDur(); window.addEventListener("resize", tickDur);
 
   /* Words stagger (21st.dev "Words Stagger": blur 10px, y 10px, 0.5s ease-out, stagger) */
@@ -943,6 +1165,7 @@ p{margin:0}
     priceNote.textContent = priceList ? "Fiyatlar " + priceList.label + " Michelin liste fiyatıdır, KDV dahil, lastik başına. Kampanya ve stok için WhatsApp'tan yazın." : "";
     var hk = "#" + key(sz.w, sz.a, sz.r, sz.c);
     if (location.hash !== hk) history.replaceState(null, "", hk);
+    document.dispatchEvent(new CustomEvent("results"));
   }
 
   function buildIndex(data){
@@ -1245,6 +1468,7 @@ p{margin:0}
       placeInd(t.parentElement);
       var r = activeRail(); r.scrollLeft = 0; observeReveal(r);
       r.querySelectorAll(".rv").forEach(function(el){ el.classList.add("is-in"); });
+      if (window.__railReset) window.__railReset();
     });
   });
 
@@ -1256,7 +1480,7 @@ p{margin:0}
   panels.forEach(function(rail){
     var down = false, startX = 0, startLeft = 0, moved = false;
     rail.addEventListener("pointerdown", function(e){
-      if (e.pointerType !== "mouse") return;
+      if (e.pointerType !== "mouse" || document.documentElement.classList.contains("gsap-rail")) return;
       down = true; moved = false; startX = e.clientX; startLeft = rail.scrollLeft; rail.classList.add("is-drag");
     });
     window.addEventListener("pointermove", function(e){
@@ -1268,6 +1492,205 @@ p{margin:0}
     rail.addEventListener("click", function(e){ if (moved){ e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
   });
 })();
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+/* ===================== V6 motion: GSAP ScrollTrigger ===================== */
+(function(){
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var docEl = document.documentElement;
+
+  /* Background loops: lazy source, play only while visible, never under reduced motion or on phones. */
+  var loops = Array.prototype.slice.call(document.querySelectorAll("video[data-loop]"));
+  function loopsAllowed(){ return !reduced && window.innerWidth >= 720; }
+  if (loops.length && "IntersectionObserver" in window){
+    var lio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if (e.isIntersecting){
+          if (!loopsAllowed()) return;
+          if (!v.getAttribute("src")){ v.src = v.getAttribute("data-src"); v.load(); }
+          var p = v.play(); if (p && p.catch) p.catch(function(){});
+        } else if (!v.paused){ v.pause(); }
+      });
+    }, { threshold: 0.05 });
+    loops.forEach(function(v){ lio.observe(v); });
+  }
+
+  if (!window.gsap || !window.ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
+  var heroST = null;
+
+  /* Desktop: jump to the point of the hero timeline where the finder card is fully in. */
+  document.querySelectorAll("[data-goto-finder]").forEach(function(a){
+    a.addEventListener("click", function(ev){
+      if (!heroST) return;
+      ev.preventDefault();
+      var y = heroST.start + (heroST.end - heroST.start) * 0.86;
+      window.scrollTo({ top: y, behavior: reduced ? "auto" : "smooth" });
+    });
+  });
+
+  function parallaxResults(){
+    ScrollTrigger.getAll().forEach(function(t){ if (t.vars.id === "plx-results") t.kill(); });
+    var grid = document.getElementById("resultsGrid");
+    var imgs = grid ? grid.querySelectorAll("img") : [];
+    if (!imgs.length) return;
+    gsap.fromTo(imgs, { y: 22 }, { y: -22, ease: "none", scrollTrigger: { id: "plx-results", trigger: grid, start: "top bottom", end: "bottom top", scrub: 0.6 } });
+  }
+
+  function hero(){
+    var stage = document.getElementById("heroStage"), img = document.getElementById("heroTire"), mover = document.getElementById("tireMove");
+    var text = document.getElementById("heroText"), card = document.getElementById("heroFinder");
+    docEl.classList.add("gsap-hero");
+    function driftX(){
+      /* Keep the whole tire inside the viewport: right edge lands at (100vw - pad) after scaling to .72 */
+      var r = mover.getBoundingClientRect();
+      var cx = r.left + r.width / 2, half = r.width * 0.36;
+      var pad = window.innerWidth * 0.05;
+      return Math.max(0, (window.innerWidth - pad) - (cx + half));
+    }
+    /* Entrance: the yellow line draws in from the left, the tire rolls in along it, the copy follows. */
+    var floor = stage.querySelector(".floor"), box = document.getElementById("heroTireBox");
+    var kids = Array.prototype.slice.call(text.children);
+    var intro = null;
+    if (window.scrollY < 40){
+      gsap.set(floor, { scaleX: 0 });
+      gsap.set(box, { x: function(){ return window.innerWidth * 0.6; }, rotation: -400 });
+      gsap.set(kids, { opacity: 0, y: 18 });
+      intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+      intro.to(floor, { scaleX: 1, duration: 0.9, ease: "power2.inOut" }, 0)
+           .to(box, { x: 0, rotation: 0, duration: 1.7 }, 0.1)
+           .to(kids, { opacity: 1, y: 0, duration: 0.7, stagger: 0.09, clearProps: "opacity,transform" }, 0.5);
+    } else {
+      gsap.set(floor, { scaleX: 1 }); gsap.set(box, { x: 0, rotation: 0 });
+    }
+    /* Scroll velocity shapes the wheel: fast scrolling blurs the spokes, stopping settles them. */
+    var blurT = 0, blurC = 0;
+    function blurTick(){
+      blurC += (blurT - blurC) * 0.25; blurT *= 0.86;
+      img.style.filter = blurC < 0.05 ? "" : "blur(" + blurC.toFixed(2) + "px)";
+    }
+    gsap.ticker.add(blurTick);
+    var tl = gsap.timeline({
+      scrollTrigger: { trigger: ".hero", start: "top top", end: "+=200%", pin: stage, scrub: true, anticipatePin: 1, invalidateOnRefresh: true, id: "hero",
+        onUpdate: function(self){ blurT = Math.min(3.5, Math.abs(self.getVelocity()) / 1600); } }
+    });
+    heroST = tl.scrollTrigger;
+    tl.fromTo(img, { rotation: 0 }, { rotation: 360, ease: "none", duration: 1 }, 0);
+    tl.fromTo(mover, { scale: 1, x: 0 }, { scale: 0.72, x: driftX, ease: "none", duration: 0.35 }, 0.5);
+    tl.fromTo(text, { opacity: 1, y: 0 }, { opacity: 0, y: -48, ease: "none", duration: 0.3 }, 0.5);
+    tl.fromTo(card, { y: function(){ return window.innerHeight * 1.1; } }, { y: 0, ease: "none", duration: 0.35 }, 0.5);
+    return function(){ docEl.classList.remove("gsap-hero"); heroST = null; gsap.ticker.remove(blurTick); if (intro) intro.kill(); gsap.set([img, mover, text, card, floor, box].concat(kids), { clearProps: "all" }); };
+  }
+
+  function montaj(){
+    var sec = document.getElementById("montaj"), stage = document.getElementById("montajStage");
+    var video = document.getElementById("montajVideo"), fb = document.getElementById("montajFallback");
+    var caps = Array.prototype.slice.call(sec.querySelectorAll("#capbox .cap")), btn = document.getElementById("capBtn");
+    var ready = false, dur = 0, fallback = false, target = 0, cur = 0, raf = 0, lastWrite = -1, fbTween = null;
+    var wins = caps.map(function(c){ return [parseFloat(c.getAttribute("data-in")), parseFloat(c.getAttribute("data-out"))]; });
+
+    function useFallback(){
+      if (fallback) return; fallback = true; ready = false;
+      video.hidden = true; fb.hidden = false;
+      fbTween = gsap.fromTo(fb, { scale: 1.15, yPercent: 0 }, { scale: 1, yPercent: -8, ease: "none", scrollTrigger: { trigger: sec, start: "top top", end: "+=260%", scrub: 0.6 } });
+    }
+    if (!video.getAttribute("src")){
+      var src = video.getAttribute("data-src");
+      var s = document.createElement("source"); s.src = src; s.type = "video/mp4";
+      s.addEventListener("error", useFallback);
+      video.addEventListener("loadedmetadata", function(){ dur = video.duration || 0; ready = dur > 0; });
+      video.preload = "auto";
+      video.appendChild(s); video.load();
+    }
+    function capOpacity(p, w){
+      var a = w[0], b = w[1], r = (b - a) * 0.22;
+      if (p <= a || p >= b) return 0;
+      if (p < a + r) return (p - a) / r;
+      if (p > b - r) return (b - p) / r;
+      return 1;
+    }
+    function paint(p){
+      caps.forEach(function(c, i){
+        var o = capOpacity(p, wins[i]);
+        c.style.opacity = o.toFixed(3);
+        c.style.transform = "translateY(" + ((1 - o) * 14).toFixed(1) + "px)";
+      });
+      var bo = p < 0.80 ? 0 : Math.min(1, (p - 0.80) / 0.06);
+      btn.style.opacity = bo.toFixed(3); btn.classList.toggle("is-on", bo > 0.5); btn.tabIndex = bo > 0.5 ? 0 : -1;
+      if (ready && !video.seeking){
+        var t = Math.min(1, Math.max(0, (p - 0.05) / 0.90)) * dur;
+        if (Math.abs(t - lastWrite) > 1 / 60){ lastWrite = t; video.currentTime = t; }
+      }
+    }
+    function tick(){
+      raf = 0;
+      cur += (target - cur) * 0.2;
+      if (Math.abs(target - cur) < 0.0005) cur = target; else raf = requestAnimationFrame(tick);
+      paint(cur);
+    }
+    var st = ScrollTrigger.create({
+      trigger: sec, start: "top top", end: "+=260%", pin: stage, anticipatePin: 1, id: "montaj",
+      onUpdate: function(self){ target = self.progress; if (!raf) raf = requestAnimationFrame(tick); },
+      onRefresh: function(self){ target = cur = self.progress; paint(cur); }
+    });
+    paint(0);
+    return function(){ if (raf) cancelAnimationFrame(raf); st.kill(); if (fbTween){ fbTween.scrollTrigger && fbTween.scrollTrigger.kill(); fbTween.kill(); } caps.forEach(function(c){ c.style.opacity = ""; c.style.transform = ""; }); btn.style.opacity = ""; };
+  }
+
+  function rail(){
+    var sec = document.getElementById("lastikler");
+    var tl = null;
+    docEl.classList.add("gsap-rail");
+    function active(){ return Array.prototype.filter.call(document.querySelectorAll(".rail-panel"), function(p){ return !p.hidden; })[0]; }
+    function kill(){ if (tl){ tl.scrollTrigger && tl.scrollTrigger.kill(); tl.kill(); tl = null; } document.querySelectorAll(".rail-panel").forEach(function(r){ gsap.set(r, { clearProps: "transform" }); gsap.set(r.querySelectorAll(".rail-item"), { clearProps: "transform" }); }); }
+    function setup(){
+      kill();
+      var r = active(); if (!r) return;
+      if (r.scrollWidth - r.clientWidth < 80) return; /* everything fits: no pin, no dead scroll */
+      var items = r.querySelectorAll(".rail-item");
+      var dist = function(){ return Math.max(0, r.scrollWidth - r.clientWidth); };
+      tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: "top top", end: function(){ return "+=" + Math.round(Math.max(window.innerHeight * 1.0, dist() * 2.0)); }, pin: true, scrub: 0.6, anticipatePin: 1, invalidateOnRefresh: true, id: "rail" } });
+      tl.fromTo(items, { y: function(i){ return 12 * i; } }, { y: 0, ease: "power2.out", duration: 0.2 }, 0);
+      tl.fromTo(r, { x: 0 }, { x: function(){ return -dist(); }, ease: "none", duration: 1 }, 0);
+    }
+    setup();
+    window.__railReset = function(){ setup(); ScrollTrigger.refresh(); };
+    return function(){ window.__railReset = null; kill(); docEl.classList.remove("gsap-rail"); };
+  }
+
+  function parallax(){
+    var made = [];
+    document.querySelectorAll(".branch .frame img").forEach(function(im){
+      made.push(gsap.fromTo(im, { yPercent: -4 }, { yPercent: 4, ease: "none", scrollTrigger: { trigger: im.closest(".branch"), start: "top bottom", end: "bottom top", scrub: 0.6 } }));
+    });
+    parallaxResults();
+    document.addEventListener("results", parallaxResults);
+    return function(){ made.forEach(function(t){ t.scrollTrigger && t.scrollTrigger.kill(); t.kill(); }); document.removeEventListener("results", parallaxResults); ScrollTrigger.getAll().forEach(function(t){ if (t.vars.id === "plx-results") t.kill(); }); };
+  }
+
+  var mm = gsap.matchMedia();
+  mm.add({
+    desktop: "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+    tablet: "(min-width: 720px) and (max-width: 1023px) and (prefers-reduced-motion: no-preference)"
+  }, function(ctx){
+    var c = ctx.conditions, undo = [];
+    if (c.desktop){ undo.push(hero()); undo.push(parallax()); undo.push(montaj()); undo.push(rail()); }
+    else if (c.tablet){ undo.push(parallax()); }
+    return function(){ undo.forEach(function(f){ f && f(); }); };
+  });
+
+  /* Refresh once fonts and the hero render are in, so pin distances are right. */
+  function refresh(){ ScrollTrigger.refresh(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  window.addEventListener("load", function(){ setTimeout(refresh, 50); });
+})();
+
+});
 </script>
 </body>
 </html>
