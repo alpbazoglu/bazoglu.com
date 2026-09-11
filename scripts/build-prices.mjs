@@ -14,6 +14,8 @@ import { parseRow, keyOf } from "../../bazoglu-site/scripts/parse-row.mjs";
 const here = dirname(fileURLToPath(import.meta.url));
 const CSV = resolve(here, "../../_sources/michelin/pricelist-2026-09.csv");
 const CATALOG = resolve(here, "../../bazoglu-site/src/data/michelin-catalog.json");
+const CRAWL = resolve(here, "../../research/catalog_all_families.json");
+const BILGI = resolve(here, "../../_sources/michelin/desen-bilgi.json");
 const OUT = resolve(here, "../assets/michelin-catalog.json");
 
 function parseCsvLine(line) {
@@ -83,6 +85,58 @@ for (const line of lines) {
 
 catalog.families = catalog.families.filter((f) => f.sizes.length);
 
+// --- EU tyre label, from the michelin.com.tr crawl ---------------------------------------
+// Every size Michelin sells carries a label: fuel class A-E, wet-grip class A-E, pass-by
+// noise in dB with its class. The values differ size to size within one pattern, so the
+// detail panel shows the exact letters when a size is chosen and the range otherwise.
+// Also carried over: the 3PMSF snowflake and M+S marks, which say whether a tyre is legal
+// as a winter tyre. Nothing here is written by us — it is Michelin's own declared data.
+const crawl = JSON.parse(readFileSync(CRAWL, "utf8"));
+const normName = (s) => s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+const crawlByName = new Map(crawl.map((f) => [normName(f.name), f]));
+const rimOf = (z) => Number(String(z.rim).replace(/[^0-9.]/g, ""));
+
+let labelled = 0, unlabelled = 0;
+for (const f of catalog.families) {
+  // a ZP family carries the base pattern's name on michelin.com.tr
+  const baseId = f.img || f.id;
+  const baseName = (byId.get(baseId) || f).name;
+  const c = crawlByName.get(normName(baseName));
+  if (!c) { unlabelled += f.sizes.length; continue; }
+  for (const s of f.sizes) {
+    const hits = (c.sizes || []).filter((z) => +z.width === s.width && +z.ratio === s.aspect && rimOf(z) === s.rim);
+    // a run-flat family only wants the run-flat entries for that size, and vice versa
+    const want = hits.filter((z) => !!z.runflat === !!f.runflat);
+    const z = (want.length ? want : hits).find((x) => x.label && x.label.energyEfficiency);
+    if (!z) { unlabelled++; continue; }
+    s.label = {
+      fuel: z.label.energyEfficiency,
+      wet: z.label.wetGrip,
+      noise: Number(z.label.externalRollingNoise) || undefined,
+      noiseClass: z.label.echoClass21 || undefined,
+    };
+    if (z["3pmsf"]) s.snow = true;
+    if (z.mpluss) s.ms = true;
+    labelled++;
+  }
+}
+
+// --- desen tanıtımı ---------------------------------------------------------------------
+// Her desenin ne işe yaradığı, dükkân dilinde. Michelin'in reklam metni değil; kaynağı
+// _sources/michelin/desen-bilgi.json. ZP ailesi taban desenin metnini devralır, üstüne
+// run-flat maddesi biner — çünkü müşteriye asıl anlatılması gereken fark odur.
+const bilgi = JSON.parse(readFileSync(BILGI, "utf8")).desenler;
+const ZP_NOKTA = "Run-flat (ZP): patlasa da sönmeden, düşük hızda yola devam edebilirsin";
+let anlatilan = 0;
+const anlatilmayan = [];
+for (const f of catalog.families) {
+  const b = bilgi[f.img || f.id];
+  if (!b) { anlatilmayan.push(f.id); continue; }
+  f.tek = b.tek;
+  f.nokta = f.runflat ? [ZP_NOKTA, ...b.nokta.filter((n) => !/run-flat/i.test(n))] : b.nokta.slice();
+  anlatilan++;
+}
+
 let sizesWithPrice = 0, sizesTotal = 0;
 for (const f of catalog.families) {
   f.sizes.sort((a, b) => a.width - b.width || a.aspect - b.aspect || a.rim - b.rim || (a.commercial ? 1 : 0) - (b.commercial ? 1 : 0));
@@ -99,5 +153,7 @@ for (const f of catalog.families) {
 catalog.priceList = { label: "Eylül 2026", validFrom: "2026-09-01", currency: "TRY", note: "KDV dahil liste fiyatı, lastik başına." };
 catalog._note = (catalog._note || "") + " Prices: Bazoğlu Michelin price list September 2026, rightmost KDV-inclusive column, per tire.";
 writeFileSync(OUT, JSON.stringify(catalog));
+console.log(`etiketli ebat=${labelled} etiketsiz=${unlabelled}`);
+console.log(`anlatimi olan desen=${anlatilan}/${catalog.families.length}` + (anlatilmayan.length ? `  metni yok: ${anlatilmayan.join(", ")}` : ""));
 console.log(`priced SKUs=${priced} run-flat=${runflat} families=${catalog.families.length} sizes added=${added} sizes with price=${sizesWithPrice}/${sizesTotal} unparsed=${unparsed.length}`);
 for (const u of unparsed) console.log("  ", u.error, "|", u.desc);

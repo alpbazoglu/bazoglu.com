@@ -561,6 +561,68 @@ html.gsap-hero .hero-stage .floor{transform-origin:0 50%}
 @media (min-width:1440px){
   .olcu .grid{grid-template-columns:repeat(4,1fr)}
 }
+
+/* ---- Desen kartı -------------------------------------------------------------
+   Ray kartına veya ölçü sonucuna basınca açılan bilgi katmanı. Kart ekranda
+   nerede duruyorsa oradan ortaya doğru büyür (--ox/--oy script'ten gelir).    */
+.desen{
+  width:min(880px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);
+  margin:auto;padding:0;border:1px solid var(--line-dark);border-radius:0;
+  background:var(--graphite);color:var(--white);overflow:visible;
+}
+.desen:focus{outline:none}
+.desen::backdrop{background:rgba(7,7,7,.82);backdrop-filter:blur(6px)}
+.desen[open]{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr)}
+
+/* açılış: karttan ortaya. Kapanışta dialog hemen kalktığı için sadece açılışı canlandırıyoruz. */
+@media (prefers-reduced-motion:no-preference){
+  .desen[open]{animation:desen-ac .42s var(--ease) both}
+  .desen[open]::backdrop{animation:desen-fon .42s var(--ease) both}
+}
+@keyframes desen-ac{
+  from{opacity:0;transform:translate(var(--ox,0),var(--oy,0)) scale(.72)}
+  to{opacity:1;transform:translate(0,0) scale(1)}
+}
+@keyframes desen-fon{from{opacity:0}to{opacity:1}}
+
+.desen-gorsel{display:flex;align-items:center;justify-content:center;padding:28px;background:var(--black);border-right:1px solid var(--line-dark)}
+.desen-gorsel img{width:100%;height:auto;max-height:340px;object-fit:contain}
+
+.desen-metin{padding:32px 64px 32px 34px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.desen-ust{font:600 13px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--yellow)}
+.desen h3{font-size:clamp(30px,3.4vw,42px);line-height:1;color:var(--white)}
+.desen-tek{font-size:17px;line-height:1.5;color:var(--white)}
+.desen-nokta{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.desen-nokta li{position:relative;padding-left:20px;font-size:15px;line-height:1.45;color:var(--white-soft)}
+.desen-nokta li::before{content:"";position:absolute;left:0;top:9px;width:8px;height:1px;background:var(--yellow)}
+.desen-rozet{font-size:13px;line-height:1.5;color:var(--white-soft);padding-top:12px;border-top:1px solid var(--line-dark)}
+.desen-fiyat{font:700 20px/1.2 var(--fd);color:var(--white)}
+.desen-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.desen-cta .btn{flex:1 1 180px;min-height:52px}
+
+.desen-kapat{
+  position:absolute;top:14px;right:14px;z-index:2;width:38px;height:38px;
+  display:grid;place-items:center;cursor:pointer;
+  background:transparent;color:var(--white-soft);border:1px solid var(--line-dark);border-radius:0;
+  transition:color .15s var(--ease),border-color .15s var(--ease),background-color .15s var(--ease);
+}
+.desen-kapat:hover{color:var(--yellow-ink);background:var(--yellow);border-color:var(--yellow)}
+.desen-kapat svg{width:18px;height:18px}
+
+/* karta basılabildiği belli olsun */
+.rail-item,#resultsGrid .cell{cursor:pointer}
+.rail-item{transition:border-color .2s var(--ease),background-color .2s var(--ease)}
+.rail-item:hover{border-color:var(--yellow);background:#202020}
+
+@media (max-width:760px){
+  .desen[open]{grid-template-columns:1fr;max-height:calc(100dvh - 24px)}
+  .desen{width:calc(100vw - 24px)}
+  .desen-gorsel{padding:18px;border-right:none;border-bottom:1px solid var(--line-dark)}
+  .desen-gorsel img{max-height:190px}
+  .desen-metin{padding:22px 20px 26px;gap:12px}
+  .desen-kapat{top:10px;right:10px;width:36px;height:36px}
+  .desen-cta .btn{flex:1 1 100%}
+}
 </style>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
@@ -922,6 +984,26 @@ html.gsap-hero .hero-stage .floor{transform-origin:0 50%}
 
 </main>
 
+<!-- Desen kartı: ray kartına veya ölçü sonucuna basınca açılır, script doldurur -->
+<dialog class="desen" id="desen" tabindex="-1" aria-labelledby="desenAd">
+  <button class="desen-kapat" id="desenKapat" type="button" aria-label="Kapat">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5l10 10M15 5L5 15"/></svg>
+  </button>
+  <div class="desen-gorsel"><img id="desenImg" width="800" height="718" alt=""></div>
+  <div class="desen-metin">
+    <p class="desen-ust" id="desenUst"></p>
+    <h3 id="desenAd"></h3>
+    <p class="desen-tek" id="desenTek"></p>
+    <ul class="desen-nokta" id="desenNokta"></ul>
+    <p class="desen-rozet" id="desenRozet"></p>
+    <p class="desen-fiyat" id="desenFiyat"></p>
+    <div class="desen-cta">
+      <a class="btn btn-yellow" id="desenEbat" href="#olcu">Ebatları gör</a>
+      <a class="btn btn-ghost" id="desenWa" target="_blank" rel="noopener">WhatsApp'tan sor</a>
+    </div>
+  </div>
+</dialog>
+
 <footer class="footer">
   <div class="wrap">
     <div class="cols">
@@ -1051,6 +1133,7 @@ html.gsap-hero .hero-stage .floor{transform-origin:0 50%}
 
   /* Size finder */
   var SEASON = { summer: "Yaz", allseason: "4 Mevsim", winter: "Kış" };
+  var SEG = { passenger: "binek", suv: "SUV / 4x4", lcv: "hafif ticari" };
   var selW = document.getElementById("selW"), selA = document.getElementById("selA"), selR = document.getElementById("selR");
   var cToggle = document.getElementById("cToggle");
   var form = document.getElementById("finder");
@@ -1140,6 +1223,7 @@ html.gsap-hero .hero-stage .floor{transform-origin:0 50%}
     } else {
       hits.forEach(function(h){
         var cell = document.createElement("div"); cell.className = "cell";
+        cell.setAttribute("data-family", h.family.id); cell.setAttribute("data-size", h.size.key);
         if (h.family.image){
           var img = document.createElement("img");
           /* ZP ailelerinin ayrı render'ı yok, taban desenin görselini kullanır */
@@ -1234,15 +1318,136 @@ html.gsap-hero .hero-stage .floor{transform-origin:0 50%}
   fetch("assets/michelin-catalog.json").then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(buildIndex).catch(fallback);
 
-  /* Rail: "Ebatları gör" preselects the family's first size */
-  document.querySelectorAll("a[data-family]").forEach(function(a){
-    a.addEventListener("click", function(){
-      var p = parseKey(a.getAttribute("data-size"));
-      if (!p || !families) return;
-      pendingFamily = a.getAttribute("data-family"); vehicle = null;
-      setMode("size"); setSize(p.w, p.a, p.r, p.c); render();
+  /* Rail ve ölçü sonucu: karta basınca desen kartı açılır. Ebada gitme işi
+     panelin içindeki "Ebatları gör" düğmesine taşındı. */
+  function gotoFamilySize(famId, sizeKey){
+    var p = parseKey(sizeKey);
+    if (!p || !families) return;
+    pendingFamily = famId; vehicle = null;
+    setMode("size"); setSize(p.w, p.a, p.r, p.c); render(); scrollResults();
+  }
+
+  var dlg = document.getElementById("desen");
+  if (dlg && dlg.showModal){
+    var dImg = document.getElementById("desenImg"), dUst = document.getElementById("desenUst");
+    var dAd = document.getElementById("desenAd"), dTek = document.getElementById("desenTek");
+    var dNokta = document.getElementById("desenNokta"), dRozet = document.getElementById("desenRozet");
+    var dFiyat = document.getElementById("desenFiyat"), dEbat = document.getElementById("desenEbat");
+    var dWa = document.getElementById("desenWa");
+    var acik = null;   /* { fam, size } */
+
+    /* kartın ekrandaki yerinden ortaya doğru büyüsün diye başlangıç noktası */
+    function origin(el){
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      dlg.style.setProperty("--ox", (r.left + r.width / 2 - innerWidth / 2).toFixed(0) + "px");
+      dlg.style.setProperty("--oy", (r.top + r.height / 2 - innerHeight / 2).toFixed(0) + "px");
+    }
+
+    /* Bir ebat seçiliyse o ebadın kesin AB etiketi, değilse ailedeki aralık. */
+    function etiket(fam, size){
+      var ler = (size ? [size] : fam.sizes).map(function(s){ return s.label; }).filter(Boolean);
+      if (!ler.length) return "";
+      function aralik(al){
+        var v = ler.map(al).filter(function(x){ return x != null && x !== ""; }).sort();
+        if (!v.length) return null;
+        var a = v[0], z = v[v.length - 1];
+        return a === z ? String(a) : a + "–" + z;
+      }
+      var y = aralik(function(l){ return l.fuel; }), i = aralik(function(l){ return l.wet; });
+      var n = ler.map(function(l){ return l.noise; }).filter(Boolean);
+      var parts = [];
+      if (y) parts.push("yakıt " + y);
+      if (i) parts.push("ıslak zemin " + i);
+      if (n.length) parts.push(Math.min.apply(null, n) === Math.max.apply(null, n)
+        ? Math.min.apply(null, n) + " dB" : Math.min.apply(null, n) + "–" + Math.max.apply(null, n) + " dB");
+      return parts.length ? "AB etiketi: " + parts.join(" · ") : "";
+    }
+
+    function rozetler(fam, size){
+      var kap = size ? [size] : fam.sizes;
+      var r = [];
+      if (fam.runflat) r.push("Run-flat (ZP)");
+      if (kap.some(function(s){ return s.snow; })) r.push("Kış sembolü (3PMSF)");
+      else if (kap.some(function(s){ return s.ms; })) r.push("M+S");
+      return r;
+    }
+
+    /* sizeKey: gösterilecek ebat. Ray kartından açılışta yoktur — oradaki ebat
+       sadece kartın bağlandığı ebattır, müşterinin ebadı değil; onu tek fiyat
+       gibi göstermek yanıltır. O yüzden ray kartı aileyi anlatır, ölçü sonucu
+       ise o ebadın kendi fiyatını ve kendi etiketini gösterir.
+       ctaKey: "Ebatları gör" düğmesinin gideceği ebat. */
+    function ac(famId, sizeKey, kaynak, ctaKey){
+      if (!families) return;
+      var fam = null;
+      for (var i = 0; i < families.length; i++) if (families[i].id === famId) fam = families[i];
+      if (!fam) return;
+      var size = sizeKey ? fam.sizes.filter(function(s){ return s.key === sizeKey; })[0] : null;
+      acik = { fam: fam, size: size, sizeKey: sizeKey };
+
+      dImg.src = "assets/" + (fam.img || fam.id) + "-800.webp";
+      dImg.alt = "Michelin " + fam.name + " lastik";
+      dUst.textContent = size ? size.display : [SEASON[fam.season] || fam.season, SEG[fam.segment] || fam.segment].join(" · ");
+      dAd.textContent = fam.name;
+      dTek.textContent = fam.tek || "";
+      dTek.hidden = !fam.tek;
+
+      dNokta.innerHTML = "";
+      (fam.nokta || []).forEach(function(n){
+        var li = document.createElement("li"); li.textContent = n; dNokta.appendChild(li);
+      });
+      dNokta.hidden = !(fam.nokta && fam.nokta.length);
+
+      var rz = rozetler(fam, size), et = etiket(fam, size);
+      dRozet.textContent = rz.concat(et ? [et] : []).join("   ·   ");
+      dRozet.hidden = !dRozet.textContent;
+
+      /* fiyat: ebat seçiliyse onun fiyatı, değilse ailenin en ucuzu */
+      var fiyatlar = fam.sizes.map(function(s){ return s.price; }).filter(Boolean);
+      var enUcuz = fiyatlar.length ? Math.min.apply(null, fiyatlar) : 0;
+      if (size && size.price) dFiyat.textContent = TL(size.price) + " · lastik başına, KDV dahil";
+      else if (enUcuz) dFiyat.textContent = fam.sizes.length + " ebat · " + TL(enUcuz) + "'den başlıyor";
+      else dFiyat.textContent = fam.sizes.length + " ebat · fiyat için WhatsApp'tan sor";
+
+      var hedefEbat = ctaKey || sizeKey || (fam.sizes.filter(function(s){ return s.price; })[0] || fam.sizes[0] || {}).key;
+      dEbat.onclick = function(ev){ ev.preventDefault(); dlg.close(); gotoFamilySize(fam.id, hedefEbat); };
+      dWa.href = waHref("Merhaba, Michelin " + fam.name + (size ? " " + size.display : "") + " için stok ve fiyat sormak istiyorum.");
+
+      origin(kaynak);
+      dlg.showModal();
+      dlg.focus();   /* odak panelin kendisinde dursun, kapat düğmesi çerçeveli açılmasın */
+    }
+
+    document.getElementById("desenKapat").addEventListener("click", function(){ dlg.close(); });
+    /* boşluğa basınca kapansın: dialog'un kendisi backdrop alanıdır */
+    dlg.addEventListener("click", function(ev){ if (ev.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", function(){ acik = null; });
+
+    /* tetikleyiciler: ray kartı ve ölçü sonucu hücresi */
+    document.addEventListener("click", function(ev){
+      var kart = ev.target.closest ? ev.target.closest(".rail-item, #resultsGrid .cell") : null;
+      if (!kart) return;
+      var link = ev.target.closest("a[href]");
+      if (link && link.target === "_blank") return;      /* WhatsApp linki kendi işini yapsın */
+      var famId = kart.getAttribute("data-family"), sizeKey = kart.getAttribute("data-size"), ctaKey = null;
+      if (!famId){
+        /* ray kartı: ebat sadece "Ebatları gör"ün hedefi, gösterilecek şey değil */
+        var a = kart.querySelector("a[data-family]");
+        if (a){ famId = a.getAttribute("data-family"); ctaKey = a.getAttribute("data-size"); sizeKey = null; }
+      }
+      if (!famId) return;
+      ev.preventDefault();
+      ac(famId, sizeKey, kart, ctaKey);
     });
-  });
+  } else {
+    /* <dialog> yoksa eski davranış: doğrudan ebada git */
+    document.querySelectorAll("a[data-family]").forEach(function(a){
+      a.addEventListener("click", function(){
+        gotoFamilySize(a.getAttribute("data-family"), a.getAttribute("data-size"));
+      });
+    });
+  }
 
   /* Finder modes */
   var modeSize = document.getElementById("modeSize"), modeVehicle = document.getElementById("modeVehicle");
