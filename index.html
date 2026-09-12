@@ -1373,7 +1373,7 @@ html.gsap-hero .hero-stage .floor{transform-origin:0 50%}
       return r;
     }
 
-    /* sizeKey: gösterilecek ebat. Ray kartından açılışta yoktur — oradaki ebat
+    /* sizeKey: gösterilecek ebat. Ray kartından açılışta yoktur, oradaki ebat
        sadece kartın bağlandığı ebattır, müşterinin ebadı değil; onu tek fiyat
        gibi göstermek yanıltır. O yüzden ray kartı aileyi anlatır, ölçü sonucu
        ise o ebadın kendi fiyatını ve kendi etiketini gösterir.
@@ -1821,8 +1821,12 @@ document.addEventListener("DOMContentLoaded", function(){
       var s = document.createElement("source"); s.src = src; s.type = "video/mp4";
       s.addEventListener("error", useFallback);
       video.addEventListener("loadedmetadata", function(){ dur = video.duration || 0; ready = dur > 0; });
-      video.preload = "auto";
-      video.appendChild(s); video.load();
+      /* Scrub klibi birkaç MB. Tamamını indirmek istiyoruz ki sarma takılmasın, ama
+         sayfanın ilk açılışıyla yarışmasın: hero görseli, katalog ve yazı tipleri
+         indikten sonra başlat. */
+      var yukle = function(){ video.preload = "auto"; video.appendChild(s); video.load(); };
+      if (document.readyState === "complete") yukle();
+      else addEventListener("load", yukle, { once: true });
     }
     function capOpacity(p, w){
       var a = w[0], b = w[1], r = (b - a) * 0.22;
@@ -1841,12 +1845,16 @@ document.addEventListener("DOMContentLoaded", function(){
       btn.style.opacity = bo.toFixed(3); btn.classList.toggle("is-on", bo > 0.5); btn.tabIndex = bo > 0.5 ? 0 : -1;
       if (ready && !video.seeking){
         var t = Math.min(1, Math.max(0, (p - 0.05) / 0.90)) * dur;
-        if (Math.abs(t - lastWrite) > 1 / 60){ lastWrite = t; video.currentTime = t; }
+        /* Klip 15 fps: bir karelik eşiğin altındaki yazmalar yeni kare getirmez,
+           sadece sarma kuyruğu şişirir ve sonrakileri geciktirir. */
+        if (Math.abs(t - lastWrite) > 1 / 15){ lastWrite = t; video.currentTime = t; }
       }
     }
     function tick(){
       raf = 0;
-      cur += (target - cur) * 0.2;
+      /* 0.2 ile video kaydırmanın ~230 ms gerisinde kalıyordu, hızlı kaydırmada
+         "geriden geliyor" hissi veriyordu. 0.32 yumuşaklığı koruyup gecikmeyi yarıya indiriyor. */
+      cur += (target - cur) * 0.32;
       if (Math.abs(target - cur) < 0.0005) cur = target; else raf = requestAnimationFrame(tick);
       paint(cur);
     }
