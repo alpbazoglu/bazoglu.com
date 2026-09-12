@@ -1829,12 +1829,11 @@ document.addEventListener("DOMContentLoaded", function(){
       var s = document.createElement("source"); s.src = src; s.type = "video/mp4";
       s.addEventListener("error", useFallback);
       video.addEventListener("loadedmetadata", function(){ dur = video.duration || 0; ready = dur > 0; });
-      /* Scrub klibi birkaç MB. Tamamını indirmek istiyoruz ki sarma takılmasın, ama
-         sayfanın ilk açılışıyla yarışmasın: hero görseli, katalog ve yazı tipleri
-         indikten sonra başlat. */
-      var yukle = function(){ video.preload = "auto"; video.appendChild(s); video.load(); };
-      if (document.readyState === "complete") yukle();
-      else addEventListener("load", yukle, { once: true });
+      /* Klip hemen inmeye başlıyor. Sayfanın load olayını beklemek denendi ve geri
+         alındı: görseller geç inince montaj bölümüne gelen kullanıcı donuk bir
+         poster görüyordu, klip daha inmemiş oluyordu. */
+      video.preload = "auto";
+      video.appendChild(s); video.load();
     }
     function capOpacity(p, w){
       var a = w[0], b = w[1], r = (b - a) * 0.22;
@@ -1853,9 +1852,9 @@ document.addEventListener("DOMContentLoaded", function(){
       btn.style.opacity = bo.toFixed(3); btn.classList.toggle("is-on", bo > 0.5); btn.tabIndex = bo > 0.5 ? 0 : -1;
       if (ready && !video.seeking){
         var t = Math.min(1, Math.max(0, (p - 0.05) / 0.90)) * dur;
-        /* Klip 15 fps: bir karelik eşiğin altındaki yazmalar yeni kare getirmez,
+        /* Klip 30 fps: bir karelik eşiğin altındaki yazmalar yeni kare getirmez,
            sadece sarma kuyruğu şişirir ve sonrakileri geciktirir. */
-        if (Math.abs(t - lastWrite) > 1 / 15){ lastWrite = t; video.currentTime = t; }
+        if (Math.abs(t - lastWrite) > 1 / 60){ lastWrite = t; video.currentTime = t; }
       }
     }
     function tick(){
